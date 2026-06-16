@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+  
+    "types": ["node"],
+
+    "outDir": "./dist",
+    "rootDir": "./src",
+
+    /* Path alias: `@/x` resolves to `src/x`, replacing deep ../../../ imports.
+       tsc only type-checks these; `tsc-alias` rewrites them in the emitted JS
+       (see the build script) so `node dist/main.js` resolves them at runtime. */
+    // "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
