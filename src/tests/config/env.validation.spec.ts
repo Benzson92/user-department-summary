@@ -1,7 +1,5 @@
-// --- Test framework ---
 import { describe, expect, it } from 'vitest';
 
-// --- Subject under test ---
 import { validateEnv } from '@/config/env.validation';
 
 describe('validateEnv', () => {

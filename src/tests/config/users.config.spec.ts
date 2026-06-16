@@ -1,24 +1,13 @@
-// --- Framework ---
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-// --- Unit under test ---
 import { usersConfig } from '@/config/users.config';
 
-/**
- * `usersConfig` is a `registerAs` factory: a pure function over `process.env`
- * that reads the environment at CALL time (inside the arrow body), not at
- * import time. So each test can swap "ingredients" in `process.env`, call the
- * factory, then put the pantry back exactly as it found it.
- */
 describe('usersConfig', () => {
-  // The only two env knobs this factory actually tastes.
   const ENV_KEYS = ['USERS_API_BASE_URL', 'USERS_API_TIMEOUT_MS'] as const;
 
   const pantry: Record<string, string | undefined> = {};
 
   beforeEach(() => {
-    // Clear the counter: stash whatever was there, then remove it so every
-    // test starts from a known-empty environment.
     for (const key of ENV_KEYS) {
       pantry[key] = process.env[key];
       delete process.env[key];
@@ -26,8 +15,6 @@ describe('usersConfig', () => {
   });
 
   afterEach(() => {
-    // Restore each ingredient to its original spot (or remove it if it never
-    // existed) so tests never leak state into one another.
     for (const key of ENV_KEYS) {
       const original = pantry[key];
       if (original === undefined) {
@@ -89,10 +76,6 @@ describe('usersConfig', () => {
   });
 
   describe('timeoutMs numeric coercion — the `??` footgun', () => {
-    // `??` only catches null/undefined. An empty string is NOT nullish, so it
-    // slips past the default and `Number('')` quietly becomes 0 — a zero-ms
-    // timeout. Pinned on purpose: switch `??` -> `||` (or validate) if you want
-    // blank values to fall back to 5_000.
     it('does NOT fall back to the default for an empty string (yields 0)', () => {
       process.env.USERS_API_TIMEOUT_MS = '';
 
@@ -106,7 +89,6 @@ describe('usersConfig', () => {
     });
 
     it('keeps the default when the var is truly unset', () => {
-      // (beforeEach already deleted it.)
       expect(usersConfig().http.timeoutMs).toBe(5_000);
     });
   });

@@ -1,13 +1,9 @@
-// --- Test framework ---
 import { describe, expect, it } from 'vitest';
 
-// --- Subject under test ---
 import { applyQueryToReport } from '@/modules/users/apply-query-to-report';
 
-// --- Domain types ---
 import type { DepartmentSummaryReport } from '@/modules/users/types/department-summary.types';
 
-// --- DTO contracts ---
 import { GetDepartmentSummaryQueryDto } from '@/modules/users/dto/get-department-summary-query.dto';
 
 const REPORT: DepartmentSummaryReport = {

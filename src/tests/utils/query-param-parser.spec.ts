@@ -1,7 +1,5 @@
-// --- Test framework ---
 import { describe, expect, it } from 'vitest';
 
-// --- Subjects under test ---
 import { toBoolean, toStringArray } from '@/utils/query-param-parser';
 
 describe('toStringArray', () => {
@@ -39,7 +37,7 @@ describe('toBoolean', () => {
   it('treats ONLY the literal "true" (any case) as true', () => {
     expect(toBoolean('true')).toBe(true);
     expect(toBoolean('TRUE')).toBe(true);
-    expect(toBoolean('false')).toBe(false); // the footgun this guards against
+    expect(toBoolean('false')).toBe(false); 
     expect(toBoolean('1')).toBe(false);
     expect(toBoolean(undefined)).toBe(false);
   });

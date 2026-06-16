@@ -1,15 +1,11 @@
-// --- Framework ---
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-// --- Config ---
 import { appConfig } from '@/config/app.config';
 
 describe('appConfig', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
-    // Fresh copy so mutations don't leak between tests. Vitest sets
-    // NODE_ENV=test by default, so we clear both keys to exercise defaults.
     process.env = { ...originalEnv };
     delete process.env.PORT;
     delete process.env.NODE_ENV;

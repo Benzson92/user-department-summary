@@ -1,4 +1,3 @@
-// --- Libraries ---
 import { plainToInstance } from 'class-transformer';
 import {
   IsEnum,
@@ -16,15 +15,6 @@ export enum NodeEnv {
   Test = 'test',
 }
 
-/**
- * Declares the SHAPE and CONSTRAINTS of the environment.
- *
- * Every field is optional because sensible DEFAULTS live in the config
- * factories (the single source of truth for values). This schema's only job is
- * to reject MALFORMED values — a non-numeric PORT, a port out of range, a base
- * URL that isn't a URL — at startup, with a precise message, rather than
- * letting the app boot and then explode at 2am on the first request.
- */
 class EnvironmentVariables {
   @IsOptional()
   @IsEnum(NodeEnv)
@@ -51,13 +41,6 @@ class EnvironmentVariables {
   USERS_API_PAGE_SIZE?: number;
 }
 
-/**
- * The function handed to `ConfigModule.forRoot({ validate })`. NestJS calls it
- * once at boot with the raw environment. We validate a COPY (with implicit
- * string -> number conversion so the numeric rules can run) and, on any error,
- * throw a readable summary. We return the raw env untouched so the config
- * factories keep reading from `process.env` as their source.
- */
 export const validateEnv = (
   raw: Record<string, unknown>,
 ): Record<string, unknown> => {

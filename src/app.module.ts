@@ -1,13 +1,10 @@
-// --- Framework ---
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-// --- Config ---
 import { appConfig } from '@/config/app.config';
 import { usersConfig } from '@/config/users.config';
 import { validateEnv } from '@/config/env.validation';
 
-// --- Features ---
 import { UsersModule } from './modules/users/users.module';
 
 @Module({

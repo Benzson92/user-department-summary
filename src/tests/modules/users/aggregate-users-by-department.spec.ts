@@ -1,26 +1,13 @@
-// --- Test framework ---
 import { describe, expect, it } from 'vitest';
 
-// --- Unit under test ---
 import { aggregateUsersByDepartment } from '@/modules/users/aggregate-users-by-department';
 
-// --- Domain types & constants ---
 import { UserGender, type DummyJsonUser } from '@/modules/users/types/user.types';
 import type {
   DepartmentSummary,
   DepartmentSummaryReport,
 } from '@/modules/users/types/department-summary.types';
 
-// ============================================================================
-// Test data factory
-// ============================================================================
-
-/**
- * Flat overrides for the ONLY fields `aggregateUsersByDepartment` actually
- * reads. Keeping the surface flat means call sites stay one-liners:
- *
- *   createTestUser({ department: 'Engineering', age: 42 })
- */
 interface CreateTestUserOverrides {
   age?: number;
   department?: string;
@@ -66,9 +53,6 @@ const createTestUser = (
     postalCode = '10110',
   } = overrides;
 
-  // Only the fields the aggregator touches are populated. The cast spares the
-  // factory from faking the entire DummyJSON payload (eyeColor, bank, crypto,
-  // ...) that the unit under test never reads.
   return {
     firstName,
     lastName,
@@ -80,14 +64,7 @@ const createTestUser = (
   } as DummyJsonUser;
 };
 
-// ============================================================================
-// Specs
-// ============================================================================
-
 describe('aggregateUsersByDepartment', () => {
-  // --------------------------------------------------------------------------
-  // Basic shape
-  // --------------------------------------------------------------------------
   describe('basic shape', () => {
     it('returns an empty report for an empty user list', () => {
       const report = aggregateUsersByDepartment([]);
@@ -139,9 +116,6 @@ describe('aggregateUsersByDepartment', () => {
     });
   });
 
-  // --------------------------------------------------------------------------
-  // Gender tally
-  // --------------------------------------------------------------------------
   describe('gender tally', () => {
     it('counts male and female users independently', () => {
       const users = [
@@ -192,9 +166,6 @@ describe('aggregateUsersByDepartment', () => {
     });
   });
 
-  // --------------------------------------------------------------------------
-  // Age range
-  // --------------------------------------------------------------------------
   describe('age range', () => {
     it('formats a single age as "age-age" when min equals max', () => {
       const users = [createTestUser({ age: 33 })];
@@ -232,9 +203,6 @@ describe('aggregateUsersByDepartment', () => {
     });
   });
 
-  // --------------------------------------------------------------------------
-  // Hair colour tally
-  // --------------------------------------------------------------------------
   describe('hair colour tally', () => {
     it('starts a new colour at 1 and increments repeats', () => {
       const users = [
@@ -266,9 +234,6 @@ describe('aggregateUsersByDepartment', () => {
     });
   });
 
-  // --------------------------------------------------------------------------
-  // User address book
-  // --------------------------------------------------------------------------
   describe('user address book', () => {
     it('maps "FirstNameLastName" (no separator) to the postal code', () => {
       const users = [
@@ -314,9 +279,6 @@ describe('aggregateUsersByDepartment', () => {
     });
   });
 
-  // --------------------------------------------------------------------------
-  // Department isolation
-  // --------------------------------------------------------------------------
   describe('department isolation', () => {
     it('does not bleed any counters between departments', () => {
       const users = [
@@ -361,9 +323,6 @@ describe('aggregateUsersByDepartment', () => {
     });
   });
 
-  // --------------------------------------------------------------------------
-  // Purity
-  // --------------------------------------------------------------------------
   describe('purity', () => {
     it('does not mutate the input users array', () => {
       const users = [
