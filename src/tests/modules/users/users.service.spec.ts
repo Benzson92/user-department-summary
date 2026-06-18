@@ -3,6 +3,7 @@ import type { Mock, MockInstance } from 'vitest';
 
 import { HttpService } from '@nestjs/axios';
 import { Logger, ServiceUnavailableException } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 
 import { from, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
@@ -10,6 +11,7 @@ import type { AxiosResponse } from 'axios';
 
 import type { DummyJsonUser, DummyJsonUsersResponse } from '@/modules/users/types/user.types';
 
+import { usersConfig } from '@/config/users.config';
 import { GetDepartmentSummaryQueryDto } from '@/modules/users/dto/get-department-summary-query.dto';
 import type { DepartmentSummaryReportDto } from '@/modules/users/dto/department-summary-response.dto';
 
@@ -70,6 +72,9 @@ const asAxiosResponse = (
 ): AxiosResponse<DummyJsonUsersResponse> =>
   ({ data }) as AxiosResponse<DummyJsonUsersResponse>;
 
+  const makeConfig = (pageSize = PAGE_SIZE): ConfigType<typeof usersConfig> =>
+  ({ pageSize }) as unknown as ConfigType<typeof usersConfig>;
+ 
 const AGGREGATED_REPORT = {
   __sentinel: 'aggregated',
 } as unknown as ReturnType<typeof aggregateUsersByDepartment>;
@@ -110,7 +115,7 @@ describe('UsersService', () => {
     httpGetMock = vi.fn();
     const httpService = { get: httpGetMock } as unknown as HttpService;
 
-    service = new UsersService(httpService);
+    service = new UsersService(httpService, makeConfig());
 
     vi.mocked(aggregateUsersByDepartment).mockReturnValue(AGGREGATED_REPORT);
     vi.mocked(applyQueryToReport).mockReturnValue(FINAL_REPORT);
