@@ -1,11 +1,15 @@
 import { HttpService } from '@nestjs/axios';
 import {
+  Inject,
   Injectable,
   Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
 
 import { firstValueFrom } from 'rxjs';
+
+import { usersConfig } from '@/config/users.config';
 
 import type { DummyJsonUser, DummyJsonUsersResponse } from './types/user.types';
 
@@ -43,9 +47,16 @@ export class UsersService {
     'company',
   ];
 
-  private static readonly PAGE_SIZE = 50;
+  private readonly pageSize: number;
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    
+    @Inject(usersConfig.KEY)
+    private readonly config: ConfigType<typeof usersConfig>,
+  ) {
+    this.pageSize = config.pageSize;
+  }
 
   public async getDepartmentSummaryReport(
     query: GetDepartmentSummaryQueryDto,
@@ -59,7 +70,7 @@ export class UsersService {
     try {
       const firstPage = await this.fetchUsersPage({ skip: 0 });
 
-      const pageSize = UsersService.PAGE_SIZE;
+      const pageSize = this.pageSize; // was UsersService.PAGE_SIZE
       const totalPages = Math.ceil(firstPage.total / pageSize);
 
       if (totalPages <= 1) {
@@ -92,7 +103,7 @@ export class UsersService {
   ): Promise<DummyJsonUsersResponse> {
     const {
       skip,
-      limit = UsersService.PAGE_SIZE,
+      limit = this.pageSize, // was UsersService.PAGE_SIZE
       select = UsersService.REQUIRED_FIELDS,
       signal,
     } = options;
