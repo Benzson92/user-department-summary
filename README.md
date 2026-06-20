@@ -3,7 +3,7 @@
  
 A small, production-shaped **NestJS + Axios + TypeScript** service that fetches
 the user directory from a configurable upstream and transforms it into a
-per-department summary. Validated env + DTOs, tested with **Vitest** (46 tests).
+per-department summary. Validated env + DTOs, tested with **Vitest**.
  
 ## Prerequisites
  
