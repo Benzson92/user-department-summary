@@ -15,8 +15,8 @@ per-department summary. Validated env + DTOs, tested with **Vitest**.
 ### 1. Clone the Repository
  
 ```bash
-git clone https://github.com/your-org/your-repo.git
-cd your-repo
+git clone https://github.com/Benzson92/user-department-summary.git
+cd user-department-summary
 ```
  
 ### 2. Install Dependencies
