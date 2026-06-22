@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { usersConfig } from '@/config/users.config';
 
 describe('usersConfig', () => {
-  const ENV_KEYS = ['USERS_API_BASE_URL', 'USERS_API_TIMEOUT_MS'] as const;
+  const ENV_KEYS = ['USERS_API_BASE_URL', 'USERS_API_TIMEOUT_MS', 'USERS_API_PAGE_SIZE'] as const;
 
   const pantry: Record<string, string | undefined> = {};
 
@@ -29,6 +29,7 @@ describe('usersConfig', () => {
     it('returns the full default recipe', () => {
       expect(usersConfig()).toEqual({
         apiBaseUrl: 'https://dummyjson.com',
+        pageSize: 50,
         http: {
           timeoutMs: 5_000,
           maxRedirects: 2,

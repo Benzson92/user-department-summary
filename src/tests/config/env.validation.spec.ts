@@ -14,6 +14,7 @@ describe('validateEnv', () => {
         PORT: '8080',
         USERS_API_BASE_URL: 'https://api.example.com',
         USERS_API_TIMEOUT_MS: '3000',
+        USERS_API_PAGE_SIZE: '50',
       }),
     ).not.toThrow();
   });
