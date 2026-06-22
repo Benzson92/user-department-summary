@@ -42,23 +42,23 @@ class EnvironmentVariables {
 }
 
 export const validateEnv = (
-  raw: Record<string, unknown>,
+  envVariables: Record<string, unknown>,
 ): Record<string, unknown> => {
-  const parsed = plainToInstance(EnvironmentVariables, raw, {
+  const envConfig = plainToInstance(EnvironmentVariables, envVariables, {
     enableImplicitConversion: true,
   });
 
-  const errors = validateSync(parsed, { skipMissingProperties: true });
+  const validationErrors = validateSync(envConfig, { skipMissingProperties: true });
 
-  if (errors.length > 0) {
-    const details = errors
+  if (validationErrors.length > 0) {
+    const errorDetails = validationErrors
       .map(
         (error) =>
           `  - ${error.property}: ${Object.values(error.constraints ?? {}).join(', ')}`,
       )
       .join('\n');
-    throw new Error(`Invalid environment configuration:\n${details}`);
+    throw new Error(`Invalid environment configuration:\n${errorDetails}`);
   }
 
-  return raw;
+  return envVariables;
 };

@@ -4,11 +4,12 @@ export const toStringArray = (value: unknown): string[] | undefined => {
   if (value === undefined || value === null) {
     return undefined;
   }
-  const parts = Array.isArray(value) ? value : String(value).split(',');
-  const cleaned = parts
+  const values = Array.isArray(value) ? value : String(value).split(',');
+  const normalizedValues = values
     .map((part) => String(part).trim())
     .filter((part) => part.length > 0);
-  return cleaned.length > 0 ? cleaned : undefined;
+    
+  return normalizedValues.length > 0 ? normalizedValues : undefined;
 };
 
 export const toBoolean = (value: unknown): boolean => {

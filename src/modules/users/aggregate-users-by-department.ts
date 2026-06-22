@@ -57,20 +57,20 @@ export const aggregateUsersByDepartment = (
   const summaryDataByDepartment = new Map<string, DepartmentSummaryData>();
 
   for (const user of users) {
-    const department = user.company.department;
+    const departmentName = user.company.department;
 
-    let summaryData = summaryDataByDepartment.get(department);
+    let summaryData = summaryDataByDepartment.get(departmentName);
     if (summaryData === undefined) {
       summaryData = createEmptyDepartmentSummaryData();
-      summaryDataByDepartment.set(department, summaryData);
+      summaryDataByDepartment.set(departmentName, summaryData);
     }
 
     updateDepartmentSummaryData({ summaryData, user });
   }
 
   const report: DepartmentSummaryReport = {};
-  for (const [department, summaryData] of summaryDataByDepartment) {
-    report[department] = buildDepartmentSummary(summaryData);
+  for (const [departmentName, summaryData] of summaryDataByDepartment) {
+    report[departmentName] = buildDepartmentSummary(summaryData);
   }
 
   return report;

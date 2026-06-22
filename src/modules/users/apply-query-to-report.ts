@@ -12,26 +12,26 @@ export const applyQueryToReport = (
 ): DepartmentSummaryReportDto => {
   const { departments, includeAddresses } = query;
 
-  const allowed =
+  const requestedDepartments =
     departments && departments.length > 0 ? new Set(departments) : undefined;
 
-  const shaped: DepartmentSummaryReportDto = {};
+  const filteredReport: DepartmentSummaryReportDto = {};
 
-  for (const [department, summary] of Object.entries(report)) {
-    if (allowed !== undefined && !allowed.has(department)) {
+  for (const [departmentName, reportSummary] of Object.entries(report)) {
+    if (requestedDepartments !== undefined && !requestedDepartments.has(departmentName)) {
       continue;
     }
 
-    const view: DepartmentSummaryDto = {
-      male: summary.male,
-      female: summary.female,
-      ageRange: summary.ageRange,
-      hair: summary.hair,
-      ...(includeAddresses ? { userAddress: summary.userAddress } : {}),
+    const departmentSummary: DepartmentSummaryDto = {
+      male: reportSummary.male,
+      female: reportSummary.female,
+      ageRange: reportSummary.ageRange,
+      hair: reportSummary.hair,
+      ...(includeAddresses ? { userAddress: reportSummary.userAddress } : {}),
     };
 
-    shaped[department] = view;
+    filteredReport[departmentName] = departmentSummary;
   }
 
-  return shaped;
+  return filteredReport;
 };
