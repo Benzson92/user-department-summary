@@ -28,6 +28,7 @@
     "@nestjs/testing": "^10.4.22",
     "@swc/core": "^1.15.40",
     "@types/node": "^20.19.41",
+    "@vitest/coverage-v8": "1.6.1",
     "tsc-alias": "^1.8.17",
     "typescript": "^5.9.3",
     "unplugin-swc": "^1.5.9",
