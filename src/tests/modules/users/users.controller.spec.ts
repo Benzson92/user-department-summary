@@ -9,68 +9,91 @@ import { GetDepartmentSummaryQueryDto } from '@/modules/users/dto/get-department
 import type { DepartmentSummaryReportDto } from '@/modules/users/dto/department-summary-response.dto';
 
 describe('UsersController', () => {
-  let controller: UsersController;
+  let usersController: UsersController;
 
-  const getDepartmentSummaryReport = vi.fn();
-  const usersServiceMock: Pick<UsersService, 'getDepartmentSummaryReport'> = {
-    getDepartmentSummaryReport,
+  const mockGetDepartmentSummaryReport = vi.fn();
+
+  const mockUsersService: Pick<
+    UsersService,
+    'getDepartmentSummaryReport'
+  > = {
+    getDepartmentSummaryReport: mockGetDepartmentSummaryReport,
   };
 
   beforeEach(async () => {
     vi.clearAllMocks();
 
-    const moduleRef: TestingModule = await Test.createTestingModule({
+    const testingModule: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [
         {
           provide: UsersService,
-          useValue: usersServiceMock,
+          useValue: mockUsersService,
         },
       ],
     }).compile();
 
-    controller = moduleRef.get<UsersController>(UsersController);
+    usersController = testingModule.get<UsersController>(UsersController);
   });
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
+    expect(usersController).toBeDefined();
   });
 
   describe('getDepartmentSummary', () => {
-    const query = {
+    const departmentSummaryQuery: GetDepartmentSummaryQueryDto = {
       departments: ['engineering', 'finance'],
       includeAddresses: true,
-    } as GetDepartmentSummaryQueryDto;
+    };
 
-    const report = {
+    const mockDepartmentSummaryReport = {
       generatedAt: '2026-06-22T00:00:00.000Z',
       departments: [],
     } as unknown as DepartmentSummaryReportDto;
 
-    it('hands the query ticket to the service unchanged', async () => {
-      getDepartmentSummaryReport.mockResolvedValue(report);
-
-      await controller.getDepartmentSummary(query);
-
-      expect(getDepartmentSummaryReport).toHaveBeenCalledTimes(1);
-      expect(getDepartmentSummaryReport).toHaveBeenCalledWith(query);
-    });
-
-    it('serves back exactly what the service plates', async () => {
-      getDepartmentSummaryReport.mockResolvedValue(report);
-
-      const result = await controller.getDepartmentSummary(query);
-
-      expect(result).toBe(report);
-    });
-
-    it('lets service errors bubble up to the framework', async () => {
-      const kitchenFire = new Error('aggregation failed');
-      getDepartmentSummaryReport.mockRejectedValue(kitchenFire);
-
-      await expect(controller.getDepartmentSummary(query)).rejects.toThrow(
-        kitchenFire,
+    it('should call the service with the provided query', async () => {
+      mockGetDepartmentSummaryReport.mockResolvedValue(
+        mockDepartmentSummaryReport,
       );
+
+      await usersController.getDepartmentSummary(
+        departmentSummaryQuery,
+      );
+
+      expect(mockGetDepartmentSummaryReport).toHaveBeenCalledTimes(1);
+
+      expect(mockGetDepartmentSummaryReport).toHaveBeenCalledWith(
+        departmentSummaryQuery,
+      );
+    });
+
+    it('should return the report returned by the service', async () => {
+      mockGetDepartmentSummaryReport.mockResolvedValue(
+        mockDepartmentSummaryReport,
+      );
+
+      const returnedDepartmentSummaryReport =
+        await usersController.getDepartmentSummary(
+          departmentSummaryQuery,
+        );
+
+      expect(returnedDepartmentSummaryReport).toBe(
+        mockDepartmentSummaryReport,
+      );
+    });
+
+    it('should propagate service errors', async () => {
+      const aggregationError = new Error('aggregation failed');
+
+      mockGetDepartmentSummaryReport.mockRejectedValue(
+        aggregationError,
+      );
+
+      await expect(
+        usersController.getDepartmentSummary(
+          departmentSummaryQuery,
+        ),
+      ).rejects.toThrow(aggregationError);
     });
   });
 });

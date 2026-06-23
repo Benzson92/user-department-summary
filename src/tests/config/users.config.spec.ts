@@ -25,8 +25,8 @@ describe('usersConfig', () => {
     }
   });
 
-  describe('defaults (no env set)', () => {
-    it('returns the full default recipe', () => {
+  describe('when environment variables are not configured', () => {
+    it('returns the default users API configuration', () => {
       expect(usersConfig()).toEqual({
         apiBaseUrl: 'https://dummyjson.com',
         pageSize: 50,
@@ -40,14 +40,14 @@ describe('usersConfig', () => {
     });
   });
 
-  describe('environment overrides', () => {
-    it('overrides apiBaseUrl from USERS_API_BASE_URL', () => {
+  describe('when environment variables are configured', () => {
+    it('uses the configured API base URL', () => {
       process.env.USERS_API_BASE_URL = 'https://users.internal.test';
 
       expect(usersConfig().apiBaseUrl).toBe('https://users.internal.test');
     });
 
-    it('overrides http.timeoutMs and coerces it to a number', () => {
+    it('converts the configured timeout value to a number', () => {
       process.env.USERS_API_TIMEOUT_MS = '12000';
 
       const { timeoutMs } = usersConfig().http;
@@ -56,7 +56,7 @@ describe('usersConfig', () => {
       expect(typeof timeoutMs).toBe('number'); // not the raw '12000' string
     });
 
-    it('re-reads process.env on every call (factory is not memoized)', () => {
+    it('returns updated values when environment variables change between calls', () => {
       process.env.USERS_API_BASE_URL = 'https://first.test';
       expect(usersConfig().apiBaseUrl).toBe('https://first.test');
 
@@ -64,7 +64,7 @@ describe('usersConfig', () => {
       expect(usersConfig().apiBaseUrl).toBe('https://second.test');
     });
 
-    it('keeps the hardening knobs constant regardless of env', () => {
+    it('preserves fixed HTTP safety limits regardless of environment overrides', () => {
       process.env.USERS_API_BASE_URL = 'https://users.internal.test';
       process.env.USERS_API_TIMEOUT_MS = '99999';
 
@@ -76,26 +76,26 @@ describe('usersConfig', () => {
     });
   });
 
-  describe('timeoutMs numeric coercion — the `??` footgun', () => {
-    it('does NOT fall back to the default for an empty string (yields 0)', () => {
+  describe('timeout value handling', () => {
+    it('returns 0 when the timeout environment variable is an empty string', () => {
       process.env.USERS_API_TIMEOUT_MS = '';
 
       expect(usersConfig().http.timeoutMs).toBe(0);
     });
 
-    it('produces NaN for a non-numeric value (no validation today)', () => {
+    it('returns NaN when the timeout environment variable is not numeric', () => {
       process.env.USERS_API_TIMEOUT_MS = 'soon';
 
       expect(Number.isNaN(usersConfig().http.timeoutMs)).toBe(true);
     });
 
-    it('keeps the default when the var is truly unset', () => {
+    it('uses the default timeout when the environment variable is not defined', () => {
       expect(usersConfig().http.timeoutMs).toBe(5_000);
     });
   });
 
-  describe('namespace wiring', () => {
-    it('registers under the `users` token', () => {
+  describe('configuration registration', () => {
+    it('registers the configuration under the users namespace', () => {
       expect(usersConfig.KEY).toBe('CONFIGURATION(users)');
     });
   });
