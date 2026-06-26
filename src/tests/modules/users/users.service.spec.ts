@@ -126,7 +126,7 @@ describe('UsersService', () => {
   });
 
   describe('getDepartmentSummaryReport — orchestration', () => {
-    it('pipes fetched users through aggregation, shapes with the query, and returns the result', async () => {
+    it('returns the query-filtered department summary generated from the fetched users', async () => {
       const allUsers = givenUserDirectory(3);
 
       const report = await service.getDepartmentSummaryReport(QUERY);
@@ -141,8 +141,8 @@ describe('UsersService', () => {
     });
   });
 
-  describe('pagination strategy (probe → fan out → stitch)', () => {
-    it('fetches a single page when the directory fits exactly within one page', async () => {
+  describe('pagination', () => {
+    it('makes only the initial request when all users fit in a single page', async () => {
       const allUsers = givenUserDirectory(PAGE_SIZE); 
 
       const report = await service.getDepartmentSummaryReport(QUERY);
@@ -152,7 +152,7 @@ describe('UsersService', () => {
       expect(report).toBe(FINAL_REPORT);
     });
 
-    it('handles an empty directory with the probe alone', async () => {
+    it('returns an empty report after the initial request when no users exist', async () => {
       givenUserDirectory(0);
 
       await service.getDepartmentSummaryReport(QUERY);
@@ -161,7 +161,7 @@ describe('UsersService', () => {
       expect(aggregateUsersByDepartment).toHaveBeenCalledWith([]);
     });
 
-    it('fans out as soon as the total spills past one page', async () => {
+    it('requests the remaining pages when the first page indicates additional users', async () => {
       givenUserDirectory(PAGE_SIZE + 1); 
 
       await service.getDepartmentSummaryReport(QUERY);
@@ -170,7 +170,7 @@ describe('UsersService', () => {
       expect(requestedSkips()).toEqual([0, PAGE_SIZE]);
     });
 
-    it('probes the first page, then fans out to every remaining offset', async () => {
+    it('requests every remaining page after discovering the total user count', async () => {
       givenUserDirectory(208); 
 
       await service.getDepartmentSummaryReport(QUERY);
@@ -178,7 +178,7 @@ describe('UsersService', () => {
       expect(requestedSkips()).toEqual([0, 50, 100, 150, 200]);
     });
 
-    it('issues all fan-out requests concurrently after the probe', async () => {
+    it('fetches all remaining pages concurrently after the initial request', async () => {
       const total = 208;
       const resolvers = new Map<number, () => void>();
 
@@ -209,7 +209,7 @@ describe('UsersService', () => {
       await expect(reportPromise).resolves.toBe(FINAL_REPORT);
     });
 
-    it('stitches pages in offset order even when fan-out responses land out of order', async () => {
+    it('preserves user ordering by offset even when paginated responses arrive out of order', async () => {
       const total = PAGE_SIZE * 3; 
       const allUsers = givenUserDirectory(total);
 
@@ -229,8 +229,8 @@ describe('UsersService', () => {
     });
   });
 
-  describe('request shaping', () => {
-    it('projects only the required fields and uses the service page size on every request', async () => {
+  describe('request construction', () => {
+    it('requests only the required user fields using the configured page size', async () => {
       givenUserDirectory(PAGE_SIZE * 2); 
 
       await service.getDepartmentSummaryReport(QUERY);
@@ -246,8 +246,8 @@ describe('UsersService', () => {
     });
   });
 
-  describe('failure semantics (all-or-nothing)', () => {
-    it('maps a failed probe to a 503 without leaking upstream details', async () => {
+  describe('error handling', () => {
+    it('returns a generic 503 when the initial upstream request fails', async () => {
       const upstreamError = new Error('ECONNREFUSED 10.0.0.7:443 (internal-gateway)');
       httpGetMock.mockReturnValue(throwError(() => upstreamError));
 
@@ -268,7 +268,7 @@ describe('UsersService', () => {
       );
     });
 
-    it('fails the entire report when any single fan-out page fails', async () => {
+    it('aborts report generation when any additional page request fails', async () => {
       givenUserDirectory(208); 
       const happyImplementation = httpGetMock.getMockImplementation()!;
 
@@ -286,7 +286,7 @@ describe('UsersService', () => {
       expect(aggregateUsersByDepartment).not.toHaveBeenCalled();
     });
 
-    it('rejects with a 503 when a page arrives without a users array', async () => {
+    it('returns a 503 when the upstream response is missing the users collection', async () => {
       httpGetMock.mockReturnValue(
         of(asAxiosResponse({ total: 10 } as unknown as DummyJsonUsersResponse)),
       );
@@ -298,7 +298,7 @@ describe('UsersService', () => {
       expect(loggerErrorSpy).toHaveBeenCalled();
     });
 
-    it('rejects with a 503 when a page reports a non-finite total', async () => {
+    it('returns a 503 when the upstream response contains an invalid total count', async () => {
       httpGetMock.mockReturnValue(
         of(asAxiosResponse(buildPage([buildUser(1)], Number.NaN, 0))),
       );
@@ -309,7 +309,7 @@ describe('UsersService', () => {
       expect(aggregateUsersByDepartment).not.toHaveBeenCalled();
     });
 
-    it('rejects with a 503 when a page reports a negative total', async () => {
+    it('returns a 503 when the upstream response contains a negative total count', async () => {
       httpGetMock.mockReturnValue(
         of(asAxiosResponse(buildPage([buildUser(1)], -1, 0))),
       );
